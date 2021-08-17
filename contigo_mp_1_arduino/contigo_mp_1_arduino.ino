@@ -8,6 +8,11 @@ int m2_pwm = 2;
 int incomingByte =5;
 int left_v = 0;
 int right_v = 0;
+int des_lv = 0;
+int des_rv = 0;
+const int forward_speed = 70;
+const int turn_speed_diff = 30;
+const int acc = 1;
 
 void setup() {
   // lobot servo motor to control the pan tilt of tablet
@@ -79,33 +84,33 @@ void loop() {
   switch (cmd_tab_mount)
   {
     case 7:
-      pan_ang = pan_ang - stepsize_tablet_mount_movement;
+      pan_ang = pan_ang + stepsize_tablet_mount_movement;
       tilt_ang = tilt_ang + stepsize_tablet_mount_movement;
       break;
     case 8:
       tilt_ang = tilt_ang + stepsize_tablet_mount_movement;
       break;
     case 9:
-      pan_ang = pan_ang + stepsize_tablet_mount_movement;
+      pan_ang = pan_ang - stepsize_tablet_mount_movement;
       tilt_ang = tilt_ang + stepsize_tablet_mount_movement;
       break;
     case 4:
-      pan_ang = pan_ang - stepsize_tablet_mount_movement;
+      pan_ang = pan_ang + stepsize_tablet_mount_movement;
       break;
     case 5:
       break;
     case 6:
-      pan_ang = pan_ang + stepsize_tablet_mount_movement;
+      pan_ang = pan_ang - stepsize_tablet_mount_movement;
       break;
     case 1:
-      pan_ang = pan_ang - stepsize_tablet_mount_movement;
+      pan_ang = pan_ang + stepsize_tablet_mount_movement;
       tilt_ang = tilt_ang - stepsize_tablet_mount_movement;
       break;
     case 2:
       tilt_ang = tilt_ang - stepsize_tablet_mount_movement;
       break;
     case 3:
-      pan_ang = pan_ang + stepsize_tablet_mount_movement;
+      pan_ang = pan_ang - stepsize_tablet_mount_movement;
       tilt_ang = tilt_ang - stepsize_tablet_mount_movement;
       break;
     case 0:
@@ -119,56 +124,51 @@ void loop() {
   switch (cmd_wheel) 
   {
     case 7:    // your hand is on the sensor
-      right_v++;
-      left_v = right_v * 0.3;
+      des_rv = forward_speed + turn_speed_diff;
+      des_lv = forward_speed - turn_speed_diff;
       break;
     case 8:    // your hand is on the sensor
-      left_v++;
-      right_v++;
+      des_rv = forward_speed;
+      des_lv = forward_speed;
       break;
     case 9:    // your hand is on the sensor
-      left_v++;
-      right_v = left_v*0.3;
+      des_rv = forward_speed - turn_speed_diff;
+      des_lv = forward_speed + turn_speed_diff;
       break;
     case 4:    // your hand is on the sensor
-      left_v--;
-      right_v++;
+      des_rv = forward_speed;
+      des_lv = -forward_speed;
       break;
     case 5:    // your hand is on the sensor
-      if(left_v>0) left_v--;
-      else if (left_v<0) left_v++;
-      else left_v = 0;
-      if(right_v>0) right_v--;
-      else if (right_v<0) right_v++;
-      else right_v = 0;
+      des_rv = 0;
+      des_lv = 0;
       break;
     case 6:    // your hand is on the sensor
-      left_v++;
-      right_v--;
+      des_rv = -forward_speed;
+      des_lv = forward_speed;
       break;
     case 1:    // your hand is on the sensor
-      right_v--;
-      left_v = right_v*0.3;
+      des_rv = -forward_speed - turn_speed_diff;
+      des_lv = -forward_speed + turn_speed_diff;
       break;
     case 2:    // your hand is on the sensor
-      left_v--;
-      right_v--;
+      des_rv = -forward_speed;
+      des_lv = -forward_speed;
       break;
     case 3:    // your hand is on the sensor
-      left_v--;
-      right_v=left_v*0.3;
+      des_rv = -forward_speed + turn_speed_diff;
+      des_lv = -forward_speed - turn_speed_diff;
       break;
     case 0:
       left_v = 0;
       right_v = 0;
   }
 
-  if(left_v >254) left_v = 254;
-  if(right_v > 254) right_v = 254;
-
-  if(left_v < -254) left_v = -254;
-  if(right_v < -254) right_v = -254;
-
+  if(left_v > des_lv) left_v = left_v - acc;
+  if(left_v < des_lv) left_v = left_v + acc;
+  if(right_v > des_rv) right_v = right_v - acc;
+  if(right_v < des_rv) right_v = right_v + acc;
+  
   WheelVel(left_v, right_v);
   if (Serial.available() > 0) 
   {
