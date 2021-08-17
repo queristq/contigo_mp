@@ -11,7 +11,7 @@ serial_comm.timeout = 0.1
 # tcp comm constants
 server = "192.168.0.171"
 port = 5555
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)youtu
 
 # thread setup
 event = Event()
@@ -56,11 +56,26 @@ def threaded_client(conn, var):
                 if data[0] == 100 and data[1] == 200:
                     var[0]=2                                                                                                                       
                 if data[0] == 200 and data[1] == 200:
-                    var[0]=3                                                                                                                       
+                    var[0]=3
+                if data[2] == 0 and data[3] == 0:
+                    var[1]=7
+                if data[2] == 100 and data[3] == 0:
+                    var[1]=8
+                if data[2] == 200 and data[3] == 0:
+                    var[1]=9
+                if data[2] == 0 and data[3] == 100:
+                    var[1]=4
+                if data[2] == 100 and data[3] == 100:
+                    var[1]=5
+                if data[2] == 200 and data[3] == 100:
+                    var[1]=6
+                if data[2] == 0 and data[3] == 200:
+                    var[1]=1
+                if data[2] == 100 and data[3] == 200:
+                    var[1]=2                                                                                                                       
+                if data[2] == 200 and data[3] == 200:
+                    var[1]=3
                 
-                # print(a, data[0], data[1])
-
-
         except:
             break
 
@@ -78,13 +93,11 @@ def threaded_serial_read(var):
     i=0
     while True:
         print(serial_comm.readline().decode('utf-8'))
-        
-        serial_comm.write(str.encode(str(var[0])))        
-        for i in range(len(var)):
-            var[i] += 1
+        rList = [int(var[0]+var[1]*10)]
+        serial_comm.write(bytes(rList))
         if event.is_set():
             break
-        sleep(.1)
+        sleep(.02)
     print('Stop printing')
 
 
@@ -106,7 +119,5 @@ while True:
         break
 t.join()
 print(my_var)
-
-
 
 serial_comm.close()
